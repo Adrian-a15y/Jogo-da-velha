@@ -1,0 +1,350 @@
+import java.util.Scanner;
+
+class Tabuleiro {
+
+    private char[][] tabuleiro;
+    private int tamanho;
+
+    public Tabuleiro(int tamanho) {
+        this.tamanho = tamanho;
+        tabuleiro = new char[tamanho][tamanho];
+    }
+
+    public boolean posicaoDisponivel(int linha, int coluna) {
+
+        if (linha < 0 || linha >= tamanho || coluna < 0 || coluna >= tamanho) {
+            return false;
+        }
+
+        return tabuleiro[linha][coluna] == '\0';
+    }
+
+    public void colocarPeca(int linha, int coluna, char simbolo) {
+        tabuleiro[linha][coluna] = simbolo;
+    }
+
+    public boolean verificarAlinhamento(char simbolo) {
+
+        for (int i = 0; i < tamanho; i++) {
+
+            boolean linhaCompleta = true;
+
+            for (int j = 0; j < tamanho; j++) {
+
+                if (tabuleiro[i][j] != simbolo) {
+                    linhaCompleta = false;
+                }
+            }
+
+            if (linhaCompleta) {
+                return true;
+            }
+        }
+
+        for (int j = 0; j < tamanho; j++) {
+
+            boolean colunaCompleta = true;
+
+            for (int i = 0; i < tamanho; i++) {
+
+                if (tabuleiro[i][j] != simbolo) {
+                    colunaCompleta = false;
+                }
+            }
+
+            if (colunaCompleta) {
+                return true;
+            }
+        }
+
+        boolean diagonalPrincipal = true;
+
+        for (int i = 0; i < tamanho; i++) {
+
+            if (tabuleiro[i][i] != simbolo) {
+                diagonalPrincipal = false;
+            }
+        }
+
+        if (diagonalPrincipal) {
+            return true;
+        }
+
+        boolean diagonalSecundaria = true;
+
+        for (int i = 0; i < tamanho; i++) {
+
+            if (tabuleiro[i][tamanho - 1 - i] != simbolo) {
+                diagonalSecundaria = false;
+            }
+        }
+
+        return diagonalSecundaria;
+    }
+
+    public boolean estaCheio() {
+
+        for (int i = 0; i < tamanho; i++) {
+
+            for (int j = 0; j < tamanho; j++) {
+
+                if (tabuleiro[i][j] == '\0') {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public boolean existeJogadaSegura(char simbolo) {
+
+        for (int i = 0; i < tamanho; i++) {
+
+            for (int j = 0; j < tamanho; j++) {
+
+                if (tabuleiro[i][j] == '\0') {
+
+                    tabuleiro[i][j] = simbolo;
+
+                    boolean alinhamento =
+                            verificarAlinhamento(simbolo);
+
+                    tabuleiro[i][j] = '\0';
+
+                    if (!alinhamento) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void mostrar() {
+
+        System.out.println();
+
+        for (int i = 0; i < tamanho; i++) {
+
+            for (int j = 0; j < tamanho; j++) {
+
+                if (tabuleiro[i][j] == '\0') {
+                    System.out.print("-");
+                } else {
+                    System.out.print(tabuleiro[i][j]);
+                }
+
+                if (j < tamanho - 1) {
+                    System.out.print(" | ");
+                }
+            }
+
+            System.out.println();
+
+            if (i < tamanho - 1) {
+                System.out.println("---------");
+            }
+        }
+
+        System.out.println();
+    }
+}
+
+class Jogador {
+
+    private String nome;
+    private char simbolo;
+
+    public Jogador(String nome, char simbolo) {
+        this.nome = nome;
+        this.simbolo = simbolo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public char getSimbolo() {
+        return simbolo;
+    }
+}
+
+class JogoDaVelha {
+
+    private Scanner entrada;
+    private Tabuleiro tabuleiro;
+    private Jogador jogador1;
+    private Jogador jogador2;
+    private Jogador jogadorAtual;
+
+    public JogoDaVelha(int tamanho, Scanner entrada) {
+
+        this.entrada = entrada;
+
+        tabuleiro = new Tabuleiro(tamanho);
+
+        jogador1 = new Jogador("Jogador 1", 'X');
+        jogador2 = new Jogador("Jogador 2", 'O');
+
+        jogadorAtual = jogador1;
+    }
+
+    public void trocarJogador() {
+
+        if (jogadorAtual == jogador1) {
+            jogadorAtual = jogador2;
+        } else {
+            jogadorAtual = jogador1;
+        }
+    }
+
+    public boolean fazerJogada(int linha, int coluna) {
+
+        if (!tabuleiro.posicaoDisponivel(linha, coluna)) {
+            return false;
+        }
+
+        tabuleiro.colocarPeca(
+                linha,
+                coluna,
+                jogadorAtual.getSimbolo()
+        );
+
+        return true;
+    }
+
+    public boolean verificarFimDeJogo() {
+
+        if (tabuleiro.verificarAlinhamento(jogadorAtual.getSimbolo())) {
+
+            tabuleiro.mostrar();
+
+            System.out.println(
+                    jogadorAtual.getNome() +
+                    " formou um alinhamento."
+            );
+
+            System.out.println(
+                    jogadorAtual.getNome() +
+                    " perdeu!"
+            );
+
+            mostrarVencedor();
+
+            return true;
+        }
+
+        if (tabuleiro.estaCheio()) {
+
+            tabuleiro.mostrar();
+
+            System.out.println(
+                    "Deu velha! A partida terminou em empate."
+            );
+
+            return true;
+        }
+
+        if (!tabuleiro.existeJogadaSegura(jogadorAtual.getSimbolo())) {
+
+            tabuleiro.mostrar();
+
+            System.out.println(
+                    jogadorAtual.getNome() +
+                    " nao possui nenhuma jogada segura."
+            );
+
+            System.out.println(
+                    jogadorAtual.getNome() +
+                    " perdeu!"
+            );
+
+            mostrarVencedor();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void mostrarVencedor() {
+
+        Jogador vencedor;
+
+        if (jogadorAtual == jogador1) {
+            vencedor = jogador2;
+        } else {
+            vencedor = jogador1;
+        }
+
+        System.out.println(
+                vencedor.getNome() +
+                " venceu!"
+        );
+    }
+
+    public void iniciar() {
+
+        boolean fimDeJogo = false;
+
+        while (!fimDeJogo) {
+
+            tabuleiro.mostrar();
+
+            System.out.println(
+                    jogadorAtual.getNome() +
+                    " (" + jogadorAtual.getSimbolo() + ")"
+            );
+
+            System.out.print("Digite a linha: ");
+            int linha = entrada.nextInt() - 1;
+
+            System.out.print("Digite a coluna: ");
+            int coluna = entrada.nextInt() - 1;
+
+            if (fazerJogada(linha, coluna)) {
+
+                fimDeJogo = verificarFimDeJogo();
+
+                if (!fimDeJogo) {
+                    trocarJogador();
+                }
+
+            } else {
+
+                System.out.println(
+                        "Posicao invalida ou ocupada!"
+                );
+            }
+        }
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner entrada = new Scanner(System.in);
+
+        System.out.print("Digite o tamanho do tabuleiro: ");
+        int tamanho = entrada.nextInt();
+
+        if (tamanho < 3) {
+
+            System.out.println(
+                    "O tamanho do tabuleiro deve ser 3 ou maior."
+            );
+
+        } else {
+
+            JogoDaVelha jogo =
+                    new JogoDaVelha(tamanho, entrada);
+
+            jogo.iniciar();
+        }
+
+        entrada.close();
+    }
+}
