@@ -1,42 +1,30 @@
 package jdv;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class PainelTabuleiro extends JPanel {
+    private JLabel[][] celulas;
 
-    private JButton[][] botoes;
-
-    public PainelTabuleiro(int tamanho, JogoDaVelha jogo) {
-        setLayout(new GridLayout(tamanho, tamanho, 5, 5));
-        botoes = new JButton[tamanho][tamanho];
+    public PainelTabuleiro(int tamanho) {
+        setLayout(new GridLayout(tamanho, tamanho, 2, 2));
+        setBackground(Color.BLACK);
+        celulas = new JLabel[tamanho][tamanho];
 
         for (int i = 0; i < tamanho; i++) {
             for (int j = 0; j < tamanho; j++) {
-                JButton botao = new JButton("");
-                botao.setFont(new Font("Arial", Font.BOLD, 24));
-                botao.setFocusable(false);
+                JLabel celula = new JLabel("", SwingConstants.CENTER);
+                celula.setFont(new Font("Arial", Font.BOLD, 28));
+                celula.setOpaque(true);
+                celula.setBackground(Color.WHITE);
 
-                final int linha = i;
-                final int coluna = j;
-
-                botao.addActionListener(e -> jogo.fazerJogada(linha, coluna));
-
-                botoes[i][j] = botao;
-                add(botao);
+                celulas[i][j] = celula;
+                add(celula);
             }
         }
     }
 
     public void marcarJogada(int linha, int coluna, char simbolo) {
-        botoes[linha][coluna].setText(String.valueOf(simbolo));
-        botoes[linha][coluna].setEnabled(false);
-    }
-
-    public void desabilitarTabuleiro() {
-        for (JButton[] linha : botoes) {
-            for (JButton btn : linha) {
-                btn.setEnabled(false);
-            }
-        }
+        celulas[linha][coluna].setText(String.valueOf(simbolo));
     }
 }

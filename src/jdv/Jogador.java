@@ -1,7 +1,6 @@
 package jdv;
 
 public class Jogador {
-
     private String nome;
     private char simbolo;
 
